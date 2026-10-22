@@ -110,6 +110,24 @@ Config/             xcconfig files (Secrets.xcconfig is git-ignored)
 TestRoutes/         GPX files for simulated driving
 ```
 
+## Versioning
+
+- **Version** (`MARKETING_VERSION`, e.g. `0.1.0`) is the user-facing [semantic version](https://semver.org). iOS only allows numbers and dots here.
+- **Build** (`CURRENT_PROJECT_VERSION`, e.g. `2`) increases for every build that leaves your machine and never goes down. It's independent of pre-release numbers.
+- **Pre-releases** are marked only in git tags, e.g. `v0.1.0-beta.1`, `v0.1.0-beta.2`; the final release is tagged `v0.1.0`.
+
+To bump:
+
+```bash
+agvtool next-version -all
+```
+
+```bash
+agvtool new-marketing-version 0.2.0
+```
+
+(`next-version` may print a harmless note about `Info.plist`; the build number lives in the project's build settings.)
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
