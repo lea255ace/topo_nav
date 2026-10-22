@@ -17,6 +17,9 @@ struct ContentView: View {
     @State private var baseStyle: BaseStyle = .satelliteStreets
     @State private var location = LocationAuthorization()
 
+    /// The map sets `viewport` to idle as soon as the user drags or rotates it.
+    private var isFollowing: Bool { viewport.followPuck != nil }
+
     var body: some View {
         Map(viewport: $viewport) {
             if location.isAuthorized {
@@ -33,6 +36,12 @@ struct ContentView: View {
                 .skyAtmosphereSunIntensity(15)
         }
         .mapStyle(baseStyle.mapStyle)
+        // The compass's tap-to-north fights the course-up follow camera, and sticks
+        // whenever there are no new course updates, so only offer it once the user
+        // has taken manual control of the camera.
+        .ornamentOptions(OrnamentOptions(
+            compass: CompassViewOptions(visibility: isFollowing ? .hidden : .adaptive)
+        ))
         .ignoresSafeArea()
         .overlay(alignment: .top) {
             Picker("Map style", selection: $baseStyle) {
