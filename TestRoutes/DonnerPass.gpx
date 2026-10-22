@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Approximate westbound I-80 drive over Donner Summit (Truckee to Kingvale), ~55 mph.
+     Points are hand-placed and interpolated linearly by Xcode, so the puck may drift slightly off the road. -->
+<gpx version="1.1" creator="TopoNav" xmlns="http://www.topografix.com/GPX/1/1">
+  <wpt lat="39.3279" lon="-120.1960"><time>2026-01-01T12:00:00Z</time></wpt>
+  <wpt lat="39.3297" lon="-120.2140"><time>2026-01-01T12:01:03Z</time></wpt>
+  <wpt lat="39.3290" lon="-120.2290"><time>2026-01-01T12:01:56Z</time></wpt>
+  <wpt lat="39.3262" lon="-120.2420"><time>2026-01-01T12:02:43Z</time></wpt>
+  <wpt lat="39.3290" lon="-120.2560"><time>2026-01-01T12:03:34Z</time></wpt>
+  <wpt lat="39.3330" lon="-120.2700"><time>2026-01-01T12:04:26Z</time></wpt>
+  <wpt lat="39.3365" lon="-120.2840"><time>2026-01-01T12:05:17Z</time></wpt>
+  <wpt lat="39.3395" lon="-120.2980"><time>2026-01-01T12:06:08Z</time></wpt>
+  <wpt lat="39.3412" lon="-120.3110"><time>2026-01-01T12:06:54Z</time></wpt>
+  <wpt lat="39.3420" lon="-120.3240"><time>2026-01-01T12:07:40Z</time></wpt>
+  <wpt lat="39.3405" lon="-120.3350"><time>2026-01-01T12:08:19Z</time></wpt>
+  <wpt lat="39.3392" lon="-120.3434"><time>2026-01-01T12:08:49Z</time></wpt>
+  <wpt lat="39.3365" lon="-120.3530"><time>2026-01-01T12:09:25Z</time></wpt>
+  <wpt lat="39.3320" lon="-120.3640"><time>2026-01-01T12:10:09Z</time></wpt>
+  <wpt lat="39.3270" lon="-120.3740"><time>2026-01-01T12:10:51Z</time></wpt>
+  <wpt lat="39.3243" lon="-120.3835"><time>2026-01-01T12:11:26Z</time></wpt>
+  <wpt lat="39.3215" lon="-120.3960"><time>2026-01-01T12:12:12Z</time></wpt>
+  <wpt lat="39.3200" lon="-120.4100"><time>2026-01-01T12:13:01Z</time></wpt>
+  <wpt lat="39.3190" lon="-120.4240"><time>2026-01-01T12:13:50Z</time></wpt>
+  <wpt lat="39.3195" lon="-120.4380"><time>2026-01-01T12:14:39Z</time></wpt>
+</gpx>

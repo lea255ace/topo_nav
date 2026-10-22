@@ -1,0 +1,9 @@
+// Shared build settings for TopoNav.
+// Your Mapbox token lives in Secrets.xcconfig (git-ignored). Copy
+// Secrets.example.xcconfig to Secrets.xcconfig and fill it in.
+// The `?` makes the include optional so a missing file doesn't break the build;
+// the app shows a "missing token" screen instead.
+#include? "Secrets.xcconfig"
+
+// Override in Secrets.xcconfig to use your own bundle identifier for device builds.
+TOPONAV_BUNDLE_ID_PREFIX = $(TOPONAV_BUNDLE_ID_PREFIX_OVERRIDE:default=org.example)
