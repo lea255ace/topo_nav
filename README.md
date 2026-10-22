@@ -76,7 +76,7 @@ Xcode resolves the Mapbox package on first open. Pick an iPhone simulator and pr
 The simulator has no GPS, so feed it a location track:
 
 - **Built-in:** with the app running, choose **Features ▸ Location ▸ Freeway Drive** in the Simulator menu.
-- **Mountain drive:** `TestRoutes/DonnerPass.gpx` is a westbound I-80 drive over Donner Summit (Truckee to Kingvale, about 27 km) at a steady 55 mph, traced from Mapbox Directions road geometry. In Xcode, open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick `DonnerPass.gpx` as the default location — or choose it while running from the location arrow in the debug bar.
+- **Mountain drive:** `TestRoutes/DonnerPass.gpx` is a westbound I-80 drive over Donner Summit (Truckee to Kingvale, about 27 km) at a steady 55 mph, traced from Mapbox Directions road geometry and smoothed into a point about every 10 m so curves play back as curves. In Xcode, open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick `DonnerPass.gpx` as the default location — or choose it while running from the location arrow in the debug bar. Xcode's playback pauses briefly at waypoints and sends no direction of travel, so the command-line playback below gives smoother, more realistic motion.
 - **From the command line:** play the same waypoints into a booted simulator:
   ```bash
   grep -oE 'lat="[^"]+" lon="[^"]+"' TestRoutes/DonnerPass.gpx | sed -E 's/lat="([^"]+)" lon="([^"]+)"/\1,\2/' | xcrun simctl location booted start --speed=25 -
