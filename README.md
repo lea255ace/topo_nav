@@ -37,7 +37,14 @@ MAPBOX_ACCESS_TOKEN = pk.your_token_here
 
 `Config/Secrets.xcconfig` is listed in `.gitignore`. The build injects the value into `Info.plist` as `MBXAccessToken`, where the Mapbox SDK reads it. If the token is missing or still the placeholder, the app shows a setup screen instead of the map.
 
-For device builds, also set `TOPONAV_BUNDLE_ID_PREFIX_OVERRIDE` (e.g. `com.yourname`) in the same file and choose your team under Signing & Capabilities.
+For device builds, also set these in the same file (see `Secrets.example.xcconfig`), so your signing details stay out of the shared project:
+
+```
+TOPONAV_BUNDLE_ID_PREFIX_OVERRIDE = com.yourname
+DEVELOPMENT_TEAM = ABCDE12345
+```
+
+Your team ID is listed in Xcode ▸ Settings ▸ Accounts; a free Personal Team works.
 
 ## 3. (If needed) Mapbox SDK download token
 
@@ -64,6 +71,16 @@ open TopoNav.xcodeproj
 ```
 
 Xcode resolves the Mapbox package on first open. Pick an iPhone simulator and press ⌘R.
+
+### On your iPhone
+
+1. Set `TOPONAV_BUNDLE_ID_PREFIX_OVERRIDE` and `DEVELOPMENT_TEAM` in `Config/Secrets.xcconfig` (above), and make sure that Apple ID is signed in under Xcode ▸ Settings ▸ Accounts.
+2. Connect the phone, unlock it and tap **Trust** when asked.
+3. Turn on **Settings ▸ Privacy & Security ▸ Developer Mode** (the phone restarts).
+4. Pick the phone as the run destination in Xcode and press ⌘R. Xcode creates the development certificate and profile automatically.
+5. The first launch is blocked until you trust your profile: **Settings ▸ General ▸ VPN & Device Management ▸** your Apple ID **▸ Trust**.
+
+With a free Personal Team, installs stop opening after 7 days; run from Xcode again to refresh.
 
 ## Using the app
 
