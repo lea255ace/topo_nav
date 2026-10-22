@@ -1,18 +1,28 @@
 import SwiftUI
 import MapboxMaps
 
-/// Root map screen: a tilted 3D terrain view, starting at Donner Pass, CA.
-/// Location following and routing are added in later build steps.
+/// Root map screen: a tilted 3D terrain view that follows the user's position,
+/// starting at Donner Pass, CA until location is available.
+/// Routing is added in a later build step.
 struct ContentView: View {
     static let donnerPass = CLLocationCoordinate2D(latitude: 39.3157, longitude: -120.3291)
     static let pitch: CGFloat = 60
+    static let followZoom: CGFloat = 14.5
     static let terrainExaggeration: Double = 1.5
+
+    /// Trails behind the puck and rotates to match the direction of travel.
+    static let followViewport: Viewport = .followPuck(zoom: followZoom, bearing: .course, pitch: pitch)
 
     @State private var viewport: Viewport = .camera(center: donnerPass, zoom: 12.5, bearing: 0, pitch: pitch)
     @State private var baseStyle: BaseStyle = .satelliteStreets
+    @State private var location = LocationAuthorization()
 
     var body: some View {
         Map(viewport: $viewport) {
+            if location.isAuthorized {
+                Puck2D(bearing: .course)
+            }
+
             RasterDemSource(id: "mapbox-dem")
                 .url("mapbox://mapbox.mapbox-terrain-dem-v1")
                 .maxzoom(14)
@@ -35,6 +45,24 @@ struct ContentView: View {
             .padding(6)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
             .padding(.top, 8)
+        }
+        .overlay(alignment: .bottom) {
+            if location.isDenied {
+                LocationDeniedBanner()
+            }
+        }
+        .onAppear {
+            if location.isAuthorized {
+                viewport = Self.followViewport
+            } else {
+                location.requestIfNeeded()
+            }
+        }
+        .onChange(of: location.isAuthorized) { _, isAuthorized in
+            guard isAuthorized else { return }
+            withViewportAnimation(.default(maxDuration: 2)) {
+                viewport = Self.followViewport
+            }
         }
     }
 }

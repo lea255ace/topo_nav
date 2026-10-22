@@ -70,7 +70,12 @@ Xcode resolves the Mapbox package on first open. Pick an iPhone simulator and pr
 The simulator has no GPS, so feed it a location track:
 
 - **Built-in:** with the app running, choose **Features ▸ Location ▸ Freeway Drive** in the Simulator menu.
-- **Mountain drive:** `TestRoutes/DonnerPass.gpx` is a westbound I-80 drive over Donner Summit (Truckee to Kingvale) at about 55 mph. In Xcode, open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick `DonnerPass.gpx` as the default location — or choose it while running from the location arrow in the debug bar. The track is hand-placed and interpolated in straight lines, so the puck may drift slightly off the road.
+- **Mountain drive:** `TestRoutes/DonnerPass.gpx` is a westbound I-80 drive over Donner Summit (Truckee to Kingvale, about 27 km) at a steady 55 mph, traced from Mapbox Directions road geometry. In Xcode, open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick `DonnerPass.gpx` as the default location — or choose it while running from the location arrow in the debug bar.
+- **From the command line:** play the same waypoints into a booted simulator:
+  ```bash
+  grep -oE 'lat="[^"]+" lon="[^"]+"' TestRoutes/DonnerPass.gpx | sed -E 's/lat="([^"]+)" lon="([^"]+)"/\1,\2/' | xcrun simctl location booted start --speed=25 -
+  ```
+- **Permission states:** `xcrun simctl privacy booted grant location org.example.TopoNav` pre-approves location; `revoke` tests the "location off" message; `reset` brings the prompt back.
 
 On a real device, test on a twisty road with a passenger operating the phone, or with the phone mounted and hands-off.
 
