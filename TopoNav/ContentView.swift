@@ -60,6 +60,11 @@ struct ContentView: View {
                 LocationDeniedBanner()
             }
         }
+        .overlay(alignment: .bottomTrailing) {
+            if location.isAuthorized && !isFollowing {
+                RecenterButton(action: startFollowing)
+            }
+        }
         .onAppear {
             if location.isAuthorized {
                 viewport = Self.followViewport
@@ -69,10 +74,35 @@ struct ContentView: View {
         }
         .onChange(of: location.isAuthorized) { _, isAuthorized in
             guard isAuthorized else { return }
-            withViewportAnimation(.default(maxDuration: 2)) {
-                viewport = Self.followViewport
-            }
+            startFollowing()
         }
+    }
+
+    private func startFollowing() {
+        withViewportAnimation(.default(maxDuration: 2)) {
+            viewport = Self.followViewport
+        }
+    }
+}
+
+/// Returns the camera to follow mode after the user has panned or rotated the map.
+struct RecenterButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label("Recenter", systemImage: "location.north.line.fill")
+                .font(.headline)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.white)
+        .background(.blue, in: Capsule())
+        .shadow(radius: 4)
+        .padding(.trailing, 16)
+        // Sit above the Mapbox attribution button, which must stay visible.
+        .padding(.bottom, 52)
     }
 }
 
