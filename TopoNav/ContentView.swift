@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var viewport: Viewport = .camera(center: donnerPass, zoom: 12.5, bearing: 0, pitch: pitch)
     @State private var baseStyle: BaseStyle = .satelliteStreets
     @State private var location = LocationAuthorization()
+    @State private var travelDirection = TravelDirection()
 
     @State private var destination: CLLocationCoordinate2D?
     @State private var route: Route?
@@ -66,6 +67,7 @@ struct ContentView: View {
             }
         }
         .mapStyle(baseStyle.mapStyle)
+        .locationDataModel(travelDirection.dataModel)
         // The compass's tap-to-north fights the course-up follow camera, and sticks
         // whenever there are no new course updates, so only offer it once the user
         // has taken manual control of the camera.

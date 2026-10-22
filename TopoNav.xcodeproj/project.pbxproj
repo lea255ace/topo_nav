@@ -16,6 +16,7 @@
 		A1000000000000000000000A /* LocationAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* LocationAuthorization.swift */; };
 		A1000000000000000000000B /* LocationDeniedBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* LocationDeniedBanner.swift */; };
 		A1000000000000000000000C /* DirectionsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* DirectionsClient.swift */; };
+		A1000000000000000000000D /* TravelDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* TravelDirection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		A2000000000000000000000A /* LocationAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationAuthorization.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* LocationDeniedBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDeniedBanner.swift; sourceTree = "<group>"; };
 		A2000000000000000000000C /* DirectionsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectionsClient.swift; sourceTree = "<group>"; };
+		A2000000000000000000000D /* TravelDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDirection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				A2000000000000000000000A /* LocationAuthorization.swift */,
 				A2000000000000000000000B /* LocationDeniedBanner.swift */,
 				A2000000000000000000000C /* DirectionsClient.swift */,
+				A2000000000000000000000D /* TravelDirection.swift */,
 				A20000000000000000000005 /* Assets.xcassets */,
 				A20000000000000000000006 /* Info.plist */,
 			);
@@ -179,6 +182,7 @@
 				A1000000000000000000000A /* LocationAuthorization.swift in Sources */,
 				A1000000000000000000000B /* LocationDeniedBanner.swift in Sources */,
 				A1000000000000000000000C /* DirectionsClient.swift in Sources */,
+				A1000000000000000000000D /* TravelDirection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
