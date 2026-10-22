@@ -108,6 +108,7 @@ On a real device, test on a twisty road with a passenger operating the phone, or
 TopoNav/            App sources, assets, Info.plist
 Config/             xcconfig files (Secrets.xcconfig is git-ignored)
 TestRoutes/         GPX files for simulated driving
+Design/AppIcon/     App icon generator and SVG sources (python3 Design/AppIcon/make_icon.py)
 ```
 
 ## Versioning
