@@ -32,14 +32,14 @@ def bez(p0, p1, p2, p3, t):
 SEGS = [((360, 1110), (440, 940), (850, 950), (840, 790)),    # near: sweep right
         ((840, 790), (835, 735), (790, 705), (700, 698)),     # turn left, behind the ridge's toe
         ((700, 698), (560, 690), (420, 560), (400, 425)),     # hidden behind the ridge
-        ((400, 425), (430, 405), (470, 398), (520, 398)),     # reappears beyond the crest
-        ((520, 398), (560, 398), (600, 404), (650, 414))]     # behind the mountain
+        ((400, 432), (440, 412), (490, 404), (540, 400)),     # reappears beyond the crest
+        ((540, 400), (580, 397), (615, 392), (660, 386))]     # behind the mountain
 # The near part (up to SPLIT of the length) is drawn in front of everything; the rest is
 # drawn before the left ridge so the ridge hides the middle of it.
 SPLIT = 0.2
 NEAR_WIDTH, FAR_WIDTH, CASING = 140, 5, 26
 # Road width shrinks in proportion to height above this horizon line, as in a real perspective view.
-HORIZON_Y = 365
+HORIZON_Y = 262
 
 
 def centreline(n=60):
@@ -96,7 +96,7 @@ def shape(d, fill, opacity=None):
 
 # --- Landforms -------------------------------------------------------------------------------
 
-FAR_HILLS = "M0,330 L90,300 L200,318 L310,285 L420,312 L520,300 L600,330 L1024,340 L1024,440 L0,440 Z"
+FAR_HILLS = "M0,225 L90,195 L200,213 L310,180 L420,207 L520,195 L600,225 L1024,235 L1024,330 L0,330 Z"
 
 # Mountain on the right: smaller and nearer than the far hills, standing on the valley floor,
 # with a main peak and a lower shoulder peak. Its left flank hides the end of the road.
@@ -116,7 +116,7 @@ SNOW_LIT = "M790,230 L787,276 L771,288 L757,258 L766,252 Z"
 SNOW_SHOULDER = "M900,268 L924,290 L912,289 L904,304 L894,292 L882,299 L875,284 Z"
 SNOW_SHOULDER_LIT = "M900,268 L894,292 L882,299 L875,284 Z"
 
-VALLEY_FLOOR = "M0,404 L300,372 L470,386 L640,394 L1024,430 L1024,1024 L0,1024 Z"
+VALLEY_FLOOR = "M0,290 L300,262 L470,272 L640,278 L1024,300 L1024,1024 L0,1024 Z"
 
 
 def tree_line(y_left, y_right, x0=0, x1=1024, bump=18, depth=26):
@@ -132,7 +132,7 @@ def tree_line(y_left, y_right, x0=0, x1=1024, bump=18, depth=26):
     return d + f" L{x1},{y_right + depth} L{x0},{y_left + depth} Z"
 
 
-TREE_LINE = tree_line(398, 446)
+TREE_LINE = tree_line(286, 306, bump=10, depth=18)
 MOUNTAIN_TREES = tree_line(476, 492, x0=500, x1=1024, bump=14, depth=30)
 
 # Rough ridgeline on the left: it runs in from beyond the left edge and descends to a toe
@@ -197,12 +197,12 @@ def scene(p):
 
 ROAD = dict(road="#FF2E9E", puck="#2F7BFF", puck_ring="#FFFFFF")
 PALETTES = {
-    "light": dict(ROAD, sky=[(0, "#3FA6EE"), (0.22, "#8CCBF6"), (0.34, "#DDF1FD")], far="#B7C9D8",
+    "light": dict(ROAD, sky=[(0, "#3FA6EE"), (0.15, "#8CCBF6"), (0.235, "#DDF1FD")], far="#B7C9D8",
                   mtn_shadow="#6B7E92", mtn_lit="#9AABBC", snow_lit="#FFFFFF", snow_shadow="#CFDAE7",
                   floor=[(0, "#B4CC97"), (0.5, "#8FB473"), (1, "#6F9A55")],
                   trees="#6A8F57", ridge_shadow="#44703F", ridge_lit="#6E9A5C",
                   fg=[(0, "#4E7D43"), (1, "#335A30")], casing="#1A2A1A"),
-    "dark": dict(ROAD, sky=[(0, "#1A2150"), (0.16, "#4A3478"), (0.27, "#B2627A"), (0.34, "#EE9A5E")], far="#7A6593",
+    "dark": dict(ROAD, sky=[(0, "#1A2150"), (0.11, "#4A3478"), (0.185, "#B2627A"), (0.235, "#EE9A5E")], far="#7A6593",
                  mtn_shadow="#2E3D66", mtn_lit="#4F6396", snow_lit="#EEF0FA", snow_shadow="#A6AFCC",
                  floor=[(0, "#56638A"), (0.5, "#36456A"), (1, "#222E4C")],
                  trees="#2C395C", ridge_shadow="#1B2745", ridge_lit="#2F4069",
