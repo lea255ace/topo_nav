@@ -65,6 +65,12 @@ open TopoNav.xcodeproj
 
 Xcode resolves the Mapbox package on first open. Pick an iPhone simulator and press ⌘R.
 
+## Using the app
+
+- **Follow mode:** once location access is allowed, the camera follows your position at a 60° tilt and turns to match your direction of travel. Drag or rotate the map to look around, then tap **Recenter** to resume following.
+- **Route to a spot:** long-press anywhere on the map to drop a destination pin. TopoNav fetches a driving route (with live traffic) from your current position and draws it on the terrain. Long-press again to replace it. Each long press is one Directions API request.
+- **Map style:** switch between **Satellite** and **Outdoors** at the top of the screen.
+
 ## Testing with simulated routes
 
 The simulator has no GPS, so feed it a location track:
