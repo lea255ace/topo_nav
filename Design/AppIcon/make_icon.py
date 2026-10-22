@@ -9,8 +9,8 @@ Writes one SVG per appearance next to this script, and, if `rsvg-convert` and Im
 Appearances: light (daylight palette), dark (dusk palette) and tinted (greyscale, which iOS
 recolours from brightness, so the road is the brightest element).
 
-Scene, back to front: sky, hazy far hills, a snow-capped mountain on the right, the valley
-floor, the far part of the road, a low wooded ridge on the left, the foreground, and the
+Scene, back to front: sky, hazy far hills, the valley floor, the far part of the road, a
+snow-capped mountain on the right, a rough ridgeline on the left, the foreground, and the
 near part of the road. Landforms are lit from the upper left, with a lit and a shadowed face.
 """
 import math
@@ -26,18 +26,20 @@ def bez(p0, p1, p2, p3, t):
     return tuple((1-t)**3*a + 3*(1-t)**2*t*b + 3*(1-t)*t*t*c + t**3*d for a, b, c, d in zip(p0, p1, p2, p3))
 
 
-# Road centreline. It sweeps right around the toe of the left ridge, turns left and passes
-# behind the ridge (hidden), reappears above the ridge's crest further away, and winds right
-# toward the foot of the mountain.
-SEGS = [((360, 1110), (430, 940), (800, 930), (790, 790)),    # near: sweep right
-        ((790, 790), (782, 740), (745, 712), (650, 700)),     # turn left, into the ridge
-        ((650, 700), (520, 690), (330, 600), (300, 470)),     # hidden behind the ridge
-        ((300, 470), (290, 430), (330, 408), (420, 398)),     # reappears beyond the crest
-        ((420, 398), (490, 392), (550, 398), (612, 392))]     # into the distance
+# Road centreline. It sweeps right with room to spare around the toe of the left ridge, turns
+# left and passes behind the ridge (hidden), reappears above the ridge's crest further away,
+# and disappears again behind the left flank of the mountain.
+SEGS = [((360, 1110), (440, 940), (850, 950), (840, 790)),    # near: sweep right
+        ((840, 790), (835, 735), (790, 705), (700, 698)),     # turn left, behind the ridge's toe
+        ((700, 698), (560, 690), (420, 560), (400, 425)),     # hidden behind the ridge
+        ((400, 425), (430, 405), (470, 398), (520, 398)),     # reappears beyond the crest
+        ((520, 398), (560, 398), (600, 404), (650, 414))]     # behind the mountain
 # The near part (up to SPLIT of the length) is drawn in front of everything; the rest is
 # drawn before the left ridge so the ridge hides the middle of it.
 SPLIT = 0.2
-NEAR_WIDTH, FAR_WIDTH, CASING = 140, 6, 26
+NEAR_WIDTH, FAR_WIDTH, CASING = 140, 5, 26
+# Road width shrinks in proportion to height above this horizon line, as in a real perspective view.
+HORIZON_Y = 365
 
 
 def centreline(n=60):
@@ -61,8 +63,9 @@ def ribbon(w0, w1, lo, hi):
         dx, dy = b[0] - a[0], b[1] - a[1]
         length = math.hypot(dx, dy) or 1
         nx, ny = -dy / length, dx / length
-        w = (w0 + (w1 - w0) * ((i / n) ** 0.4)) / 2
         x, y = CENTRE[i]
+        depth = max(y - HORIZON_Y, 0) / (CENTRE[0][1] - HORIZON_Y)
+        w = max(w0 * depth, w1) / 2
         left.append((x + nx * w, y + ny * w))
         right.append((x - nx * w, y - ny * w))
     return "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in left + right[::-1]) + " Z"
@@ -95,22 +98,23 @@ def shape(d, fill, opacity=None):
 
 FAR_HILLS = "M0,330 L90,300 L200,318 L310,285 L420,312 L520,300 L600,330 L1024,340 L1024,440 L0,440 Z"
 
-# Background mountain on the right: main peak and a lower shoulder peak.
-MOUNTAIN = ("M420,384 L560,300 L640,252 L720,192 L790,140 L850,198 L902,172 L960,214 L1024,250 "
-            "L1024,460 L420,460 Z")
+# Mountain on the right: smaller and nearer than the far hills, standing on the valley floor,
+# with a main peak and a lower shoulder peak. Its left flank hides the end of the road.
+MOUNTAIN = ("M520,470 L600,410 L660,350 L720,290 L790,230 L846,282 L900,268 L960,300 L1024,330 "
+            "L1024,500 L520,500 Z")
 MOUNTAIN_LIT = [  # sunlit faces, left of each peak's spine
-    "M790,140 L772,236 L726,330 L700,460 L420,460 L420,384 L560,300 L640,252 L720,192 Z",
-    "M902,172 L884,262 L872,460 L800,460 L826,310 L850,198 Z",
+    "M790,230 L768,310 L738,400 L722,500 L520,500 L520,470 L600,410 L660,350 L720,290 Z",
+    "M900,268 L884,330 L874,500 L820,500 L842,340 L846,282 Z",
 ]
 MOUNTAIN_GULLIES = [  # thin shadowed creases on the lit face
-    "M640,252 L622,320 L598,410 L612,330 Z",
-    "M720,192 L702,280 L668,400 L688,284 Z",
-    "M850,198 L838,270 L818,380 L830,276 Z",
+    "M660,350 L648,400 L632,460 L642,404 Z",
+    "M720,290 L706,350 L684,440 L696,356 Z",
+    "M846,282 L838,340 L826,420 L832,344 Z",
 ]
-SNOW = "M790,140 L830,190 L812,186 L800,212 L786,194 L768,208 L752,174 L762,166 Z"
-SNOW_LIT = "M790,140 L786,194 L768,208 L752,174 L762,166 Z"
-SNOW_SHOULDER = "M902,172 L930,198 L916,196 L906,214 L894,198 L880,206 L872,188 Z"
-SNOW_SHOULDER_LIT = "M902,172 L894,198 L880,206 L872,188 Z"
+SNOW = "M790,230 L824,272 L809,269 L799,290 L787,276 L771,288 L757,258 L766,252 Z"
+SNOW_LIT = "M790,230 L787,276 L771,288 L757,258 L766,252 Z"
+SNOW_SHOULDER = "M900,268 L924,290 L912,289 L904,304 L894,292 L882,299 L875,284 Z"
+SNOW_SHOULDER_LIT = "M900,268 L894,292 L882,299 L875,284 Z"
 
 VALLEY_FLOOR = "M0,404 L300,372 L470,386 L640,394 L1024,430 L1024,1024 L0,1024 Z"
 
@@ -129,16 +133,40 @@ def tree_line(y_left, y_right, x0=0, x1=1024, bump=18, depth=26):
 
 
 TREE_LINE = tree_line(398, 446)
+MOUNTAIN_TREES = tree_line(476, 492, x0=500, x1=1024, bump=14, depth=30)
 
-# Low, wide wooded ridge on the left, its toe reaching toward the middle of the frame.
-RIDGE = ("M0,470 L80,452 L180,440 L270,448 L360,470 L450,505 L540,560 L620,630 L690,700 L725,740 "
-         "L640,770 L0,860 Z")
-RIDGE_CREST_LIT = ("M0,470 L80,452 L180,440 L270,448 L360,470 L450,505 L540,560 L620,630 L690,700 "
-                   "L640,692 L560,624 L470,566 L380,526 L270,504 L160,508 L60,522 L0,534 Z")
-RIDGE_CREASES = [  # shadowed folds running down the ridge's front face
-    "M150,512 C170,570 150,640 110,700 C140,640 150,580 132,516 Z",
-    "M330,520 C350,590 330,680 290,770 C320,690 330,600 312,522 Z",
-    "M500,580 C512,640 500,700 470,760 C492,700 498,640 484,586 Z",
+# Rough ridgeline on the left: it runs in from beyond the left edge and descends to a toe
+# in the middle of the frame. Its crest is jagged, lit from the upper left.
+RIDGE_CREST = [(-20, 404), (30, 392), (62, 402), (96, 386), (128, 398), (160, 380), (196, 396),
+               (228, 388), (262, 404), (296, 398), (330, 424), (362, 418), (396, 440), (430, 452),
+               (466, 476), (498, 486), (532, 512), (566, 530), (598, 560), (630, 584), (658, 618),
+               (686, 648), (706, 682), (722, 712), (730, 738)]
+
+
+def _pts(points):
+    return " L".join(f"{x},{y}" for x, y in points)
+
+
+RIDGE = f"M{_pts(RIDGE_CREST)} L712,762 L660,780 L-20,880 Z"
+
+
+def _lit_band():
+    """The sunlit upper face: a band below the crest, thinning toward the toe."""
+    n = len(RIDGE_CREST) - 1
+    lower = []
+    for i, (x, y) in enumerate(RIDGE_CREST):
+        band = 70 - 52 * i / n + (12 if i % 3 == 0 else 0)   # uneven lower edge reads as rock
+        lower.append((x - 14 * i / n, y + band))
+    return f"M{_pts(RIDGE_CREST)} L{_pts(lower[::-1])} Z"
+
+
+RIDGE_CREST_LIT = _lit_band()
+RIDGE_CREASES = [  # shadowed gullies running down the ridge's front face
+    "M96,440 C110,520 96,610 60,700 C86,610 96,520 82,444 Z",
+    "M228,446 C246,530 232,640 196,760 C222,640 232,530 214,450 Z",
+    "M362,476 C378,560 364,660 330,770 C354,660 364,560 348,480 Z",
+    "M498,536 C510,600 500,670 474,740 C492,670 498,600 486,540 Z",
+    "M630,624 C638,660 630,700 612,740 C626,700 630,660 620,628 Z",
 ]
 
 FOREGROUND = "M0,884 L280,818 L640,772 L760,802 L1024,782 L1024,1024 L0,1024 Z"
@@ -149,17 +177,18 @@ def scene(p):
 <defs>{gradient("sky", p["sky"])}{gradient("floor", p["floor"])}{gradient("fg", p["fg"])}</defs>
 <rect width="1024" height="1024" fill="url(#sky)"/>
 {shape(FAR_HILLS, p["far"])}
+{shape(VALLEY_FLOOR, "url(#floor)")}
+{shape(TREE_LINE, p["trees"], 0.85)}
+{road(p, near=False)}
 {shape(MOUNTAIN, p["mtn_shadow"])}
 {"".join(shape(d, p["mtn_lit"]) for d in MOUNTAIN_LIT)}
 {"".join(shape(d, p["mtn_shadow"], 0.55) for d in MOUNTAIN_GULLIES)}
 {shape(SNOW, p["snow_shadow"])}{shape(SNOW_LIT, p["snow_lit"])}
 {shape(SNOW_SHOULDER, p["snow_shadow"])}{shape(SNOW_SHOULDER_LIT, p["snow_lit"])}
-{shape(VALLEY_FLOOR, "url(#floor)")}
-{shape(TREE_LINE, p["trees"], 0.85)}
-{road(p, near=False)}
+{shape(MOUNTAIN_TREES, p["trees"])}
 {shape(RIDGE, p["ridge_shadow"])}
 {shape(RIDGE_CREST_LIT, p["ridge_lit"])}
-{"".join(shape(d, p["casing"], 0.22) for d in RIDGE_CREASES)}
+{"".join(shape(d, p["casing"], 0.25) for d in RIDGE_CREASES)}
 {shape(FOREGROUND, "url(#fg)")}
 {road(p, near=True)}
 {puck(p)}
