@@ -122,7 +122,7 @@ The simulator has no GPS, so feed it a location track:
   ```bash
   python3 TestRoutes/play_route.py MountRose
   ```
-  Options: `--from N` starts at sample N of the drive, `--speed` sets meters per second (default: the drive's speed), `--device` picks a simulator other than the booted one. Stop playback with `xcrun simctl location booted clear`.
+  Options: `--from N` starts at sample N of the drive, `--speed` sets meters per second (default: the drive's speed), `--device` picks a simulator other than the booted one. Stop playback with `python3 TestRoutes/stop_route.py`.
 - **Playing a drive by hand:** play its points into a booted simulator. `--speed` is in meters per second (25 ≈ 55 mph):
   ```bash
   grep -oE 'lat="[^"]+" lon="[^"]+"' TestRoutes/MountRose.gpx | sed -E 's/lat="([^"]+)" lon="([^"]+)"/\1,\2/' | xcrun simctl location booted start --speed=25 -

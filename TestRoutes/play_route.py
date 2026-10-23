@@ -102,7 +102,8 @@ def main():
 
     stdin = "\n".join(f"{lat},{lon}" for lat, lon in drive) + "\n"
     simctl("location", args.device, "start", f"--speed={speed:.2f}", "-", stdin=stdin)
-    print(f"Driving. Stop with: xcrun simctl location {args.device} clear")
+    stop = "python3 TestRoutes/stop_route.py" + ("" if args.device == "booted" else f" --device {args.device!r}")
+    print(f"Driving. Stop with: {stop}")
 
 
 if __name__ == "__main__":
