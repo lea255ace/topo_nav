@@ -88,17 +88,42 @@ With a free Personal Team, installs stop opening after 7 days; run from Xcode ag
 - **Route to a spot:** long-press anywhere on the map to drop a destination pin. TopoNav fetches a driving route (with live traffic) from your current position and draws it on the terrain. Long-press again to replace it. Each long press is one Directions API request.
 - **Map style:** switch between **Satellite** and **Outdoors** at the top of the screen.
 
+### Tuning the camera (debug builds)
+
+Debug builds show a sliders button next to the map style picker. It opens a panel for tuning the follow view live while you drive or play a test route:
+
+- **Pitch** (0–85°): how far the camera tilts toward the horizon.
+- **Zoom:** how close the camera sits to the puck.
+- **Puck lower by:** moves the puck down the screen to show more road ahead.
+- **Exaggeration:** terrain height multiplier.
+- **Smoothing:** how gently the camera turns to a new direction; higher is steadier but lags more.
+- **Look ahead / Look-ahead weight:** while a route is shown and you're on it, turns the camera toward where the route goes that far ahead. A weight of 0 follows your direction of travel only.
+
+Values are saved between launches. **Copy values** puts them on the clipboard so they can become the defaults in `CameraTuning` (`TopoNav/CameraSettings.swift`); release builds always use those defaults.
+
 ## Testing with simulated routes
 
 The simulator has no GPS, so feed it a location track:
 
 - **Built-in:** with the app running, choose **Features ▸ Location ▸ Freeway Drive** in the Simulator menu.
-- **Mountain drive:** `TestRoutes/DonnerPass.gpx` is a westbound I-80 drive over Donner Summit (Truckee to Kingvale, about 27 km) at a steady 55 mph, traced from Mapbox Directions road geometry and smoothed into a point about every 10 m so curves play back as curves. In Xcode, open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick `DonnerPass.gpx` as the default location — or choose it while running from the location arrow in the debug bar. Xcode's playback pauses briefly at waypoints and sends no direction of travel, so the command-line playback below gives smoother, more realistic motion.
-- **From the command line:** play the same waypoints into a booted simulator:
+- **Test drives in `TestRoutes/`**, each traced from real road geometry with a point about every 10 m:
+
+  | File | Drive | Length |
+  |---|---|---|
+  | `DonnerPass.gpx` | I-80 west over Donner Summit, Truckee to Kingvale, CA | 27 km |
+  | `FeatherRiver.gpx` | CA-70 up the Feather River Canyon, Jarbo Gap to Belden, CA | 46 km |
+  | `MountRose.gpx` | NV-431 switchbacks from Incline Village up Mount Rose | 15 km |
+  | `EmeraldBay.gpx` | CA-89 cliffside curves above Emerald Bay, Lake Tahoe | 23 km |
+  | `Susquehanna.gpx` | Harrisburg to Williamsport, PA along the Susquehanna: US-15, US-11/15, then I-180 | 159 km |
+
+- **Playing a drive (recommended):** play its points into a booted simulator. `--speed` is in meters per second (25 ≈ 55 mph):
   ```bash
-  grep -oE 'lat="[^"]+" lon="[^"]+"' TestRoutes/DonnerPass.gpx | sed -E 's/lat="([^"]+)" lon="([^"]+)"/\1,\2/' | xcrun simctl location booted start --speed=25 -
+  grep -oE 'lat="[^"]+" lon="[^"]+"' TestRoutes/MountRose.gpx | sed -E 's/lat="([^"]+)" lon="([^"]+)"/\1,\2/' | xcrun simctl location booted start --speed=25 -
   ```
-- **Permission states:** `xcrun simctl privacy booted grant location org.example.TopoNav` pre-approves location; `revoke` tests the "location off" message; `reset` brings the prompt back.
+  Stop it with `xcrun simctl location booted clear`. To try look-ahead, long-press on the road ahead so a route is shown along the drive.
+- **From Xcode:** open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick a GPX file, or choose one while running from the location arrow in the debug bar. Xcode's playback pauses briefly at waypoints and sends no direction of travel, so the command-line playback gives smoother, more realistic motion.
+- **Adding a drive:** add an entry with waypoints to `ROUTES` in `TestRoutes/make_route.py`, then run `python3 TestRoutes/make_route.py <name>`. It reads your token from `Config/Secrets.xcconfig`.
+- **Permission states:** `xcrun simctl privacy booted grant location <bundle id>` pre-approves location; `revoke` tests the "location off" message; `reset` brings the prompt back.
 
 On a real device, test on a twisty road with a passenger operating the phone, or with the phone mounted and hands-off.
 
@@ -107,7 +132,7 @@ On a real device, test on a twisty road with a passenger operating the phone, or
 ```
 TopoNav/            App sources, assets, Info.plist
 Config/             xcconfig files (Secrets.xcconfig is git-ignored)
-TestRoutes/         GPX files for simulated driving
+TestRoutes/         GPX files for simulated driving, and make_route.py to generate more
 Design/AppIcon/     App icon generator and SVG sources (python3 Design/AppIcon/make_icon.py)
 ```
 
