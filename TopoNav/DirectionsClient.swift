@@ -32,6 +32,8 @@ enum DirectionsError: LocalizedError {
             "No Mapbox access token is configured."
         case .network(let error) where error.code == .notConnectedToInternet:
             "You're offline. Check your connection and try again."
+        case .network(let error) where error.code == .timedOut:
+            "Mapbox took too long to respond. Try again in a moment."
         case .network:
             "Couldn't reach Mapbox. Check your connection and try again."
         case .noRoute:
@@ -51,8 +53,38 @@ enum DirectionsError: LocalizedError {
 /// Fetches driving routes from the Mapbox Directions API v5 using URLSession.
 struct DirectionsClient {
     var session: URLSession = .shared
+    /// Give up on a single request after this long.
+    var requestTimeout: TimeInterval = 8
+    /// A "no route" answer slower than this is treated as a possible backend hiccup and retried
+    /// once; the traffic-aware profile occasionally stalls, then answers NoRoute for a valid trip.
+    var slowNoRouteThreshold: TimeInterval = 5
 
+    /// Requests a route, retrying once on failures that look transient: a timeout, a server
+    /// error, or a slow "no route". Fast "no route" answers and cancellations are not retried.
     func route(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D) async throws -> Route {
+        let started = Date()
+        do {
+            return try await requestRoute(from: origin, to: destination)
+        } catch let error as DirectionsError where isTransient(error, elapsed: Date().timeIntervalSince(started)) {
+            try Task.checkCancellation()
+            return try await requestRoute(from: origin, to: destination)
+        }
+    }
+
+    private func isTransient(_ error: DirectionsError, elapsed: TimeInterval) -> Bool {
+        switch error {
+        case .network(let urlError):
+            urlError.code == .timedOut || urlError.code == .networkConnectionLost
+        case .server(let status, _):
+            status >= 500
+        case .noRoute:
+            elapsed >= slowNoRouteThreshold
+        default:
+            false
+        }
+    }
+
+    private func requestRoute(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D) async throws -> Route {
         guard let token = MapboxToken.value else { throw DirectionsError.missingToken }
 
         let coordinates = [origin, destination]
@@ -68,7 +100,9 @@ struct DirectionsClient {
         let data: Data
         let response: URLResponse
         do {
-            (data, response) = try await session.data(from: components.url!)
+            var request = URLRequest(url: components.url!)
+            request.timeoutInterval = requestTimeout
+            (data, response) = try await session.data(for: request)
         } catch let error as URLError {
             throw DirectionsError.network(error)
         }

@@ -4,7 +4,7 @@ An iPhone app for live, route-based navigation on a 3D terrain map. Instead of a
 
 Built with Swift, SwiftUI and the [Mapbox Maps SDK for iOS](https://github.com/mapbox/mapbox-maps-ios) (v11). Routes come from the Mapbox Directions API. You supply your own Mapbox access token.
 
-> **Status:** early development. Version 1 covers a 3D terrain map, location follow mode, long-press routing and a recenter button. Search, rerouting and spoken directions are not included yet.
+> **Status:** version 0.1.0: a 3D terrain map with Satellite and Outdoors styles, location follow mode with a course-up camera, long-press routing and a Recenter button. Search, rerouting, spoken directions and CarPlay are not included yet.
 
 ## Requirements
 
