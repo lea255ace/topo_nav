@@ -118,11 +118,16 @@ The simulator has no GPS, so feed it a location track:
   | `EmeraldBay.gpx` | CA-89 cliffside curves above Emerald Bay, Lake Tahoe | 23 km |
   | `Susquehanna.gpx` | Harrisburg to Williamsport, PA along the Susquehanna: US-15, US-11/15, then I-180 | 159 km |
 
-- **Playing a drive (recommended):** play its points into a booted simulator. `--speed` is in meters per second (25 ≈ 55 mph):
+- **Playing a drive (recommended):** `TestRoutes/play_route.py` stops any running playback, moves the simulated location to the drive's start, relaunches the debug build with a route to the drive's end (through the same waypoints, so it follows the same roads), then plays the drive:
+  ```bash
+  python3 TestRoutes/play_route.py MountRose
+  ```
+  Options: `--from N` starts at sample N of the drive, `--speed` sets meters per second (default: the drive's speed), `--device` picks a simulator other than the booted one. Stop playback with `xcrun simctl location booted clear`.
+- **Playing a drive by hand:** play its points into a booted simulator. `--speed` is in meters per second (25 ≈ 55 mph):
   ```bash
   grep -oE 'lat="[^"]+" lon="[^"]+"' TestRoutes/MountRose.gpx | sed -E 's/lat="([^"]+)" lon="([^"]+)"/\1,\2/' | xcrun simctl location booted start --speed=25 -
   ```
-  Stop it with `xcrun simctl location booted clear`. To try look-ahead, long-press on the road ahead so a route is shown along the drive.
+  To try look-ahead this way, long-press on the road ahead so a route is shown along the drive.
 - **From Xcode:** open **Product ▸ Scheme ▸ Edit Scheme ▸ Run ▸ Options**, tick *Allow Location Simulation* and pick a GPX file, or choose one while running from the location arrow in the debug bar. Xcode's playback pauses briefly at waypoints and sends no direction of travel, so the command-line playback gives smoother, more realistic motion.
 - **Adding a drive:** add an entry with waypoints to `ROUTES` in `TestRoutes/make_route.py`, then run `python3 TestRoutes/make_route.py <name>`. It reads your token from `Config/Secrets.xcconfig`.
 - **Permission states:** `xcrun simctl privacy booted grant location <bundle id>` pre-approves location; `revoke` tests the "location off" message; `reset` brings the prompt back.
@@ -134,7 +139,7 @@ On a real device, test on a twisty road with a passenger operating the phone, or
 ```
 TopoNav/            App sources, assets, Info.plist
 Config/             xcconfig files (Secrets.xcconfig is git-ignored)
-TestRoutes/         GPX files for simulated driving, and make_route.py to generate more
+TestRoutes/         GPX files for simulated driving; play_route.py replays one, make_route.py adds more
 Design/AppIcon/     App icon generator and SVG sources (python3 Design/AppIcon/make_icon.py)
 ```
 

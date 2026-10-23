@@ -24,6 +24,8 @@ final class TravelDirection {
 
     /// Current tuning, updated by the view when the settings change.
     var tuning = CameraTuning.defaults
+    /// The most recent position, or nil before the first fix.
+    private(set) var lastCoordinate: CLLocationCoordinate2D?
     /// Called with each fix's position while a route is shown.
     var onPositionWithRoute: ((CLLocationCoordinate2D) -> Void)?
     /// The active route's geometry, or nil when no route is shown.
@@ -40,6 +42,7 @@ final class TravelDirection {
     private func process(_ location: Location) -> Location {
         let lookAhead = lookAhead
         let distance = tuning.lookAheadDistance
+        lastCoordinate = location.coordinate
         if lookAhead != nil { onPositionWithRoute?(location.coordinate) }
         guard let bearings = estimator.update(
             location,

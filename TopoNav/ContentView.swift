@@ -191,6 +191,7 @@ struct ContentView: View {
         .sheet(isPresented: $showsTuning) {
             CameraTuningPanel(settings: settings)
         }
+        .task { await requestRouteFromLaunchArguments() }
 #endif
     }
 
@@ -200,8 +201,33 @@ struct ContentView: View {
         }
     }
 
-    /// Drops a destination pin and replaces any existing route with a new one from `origin`.
-    private func requestRoute(to target: CLLocationCoordinate2D, from origin: CLLocationCoordinate2D?) {
+#if DEBUG
+    /// Launch arguments `-TopoNavRouteTo lat,lon [-TopoNavRouteVia "lat,lon;lat,lon"]` (used by
+    /// TestRoutes/play_route.py) drop a destination pin and route to it from the first location
+    /// fix, through the `via` points.
+    private func requestRouteFromLaunchArguments() async {
+        let defaults = UserDefaults.standard
+        guard let target = defaults.string(forKey: "TopoNavRouteTo").flatMap(Self.coordinate) else { return }
+        let via = (defaults.string(forKey: "TopoNavRouteVia") ?? "")
+            .split(separator: ";").compactMap { Self.coordinate(String($0)) }
+
+        for _ in 0..<40 where travelDirection.lastCoordinate == nil {
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        requestRoute(to: target, from: travelDirection.lastCoordinate, via: via)
+    }
+
+    private static func coordinate(_ text: String) -> CLLocationCoordinate2D? {
+        let parts = text.split(separator: ",").compactMap { Double($0) }
+        guard parts.count == 2 else { return nil }
+        return CLLocationCoordinate2D(latitude: parts[0], longitude: parts[1])
+    }
+#endif
+
+    /// Drops a destination pin and replaces any existing route with a new one from `origin`,
+    /// optionally through `via` waypoints.
+    private func requestRoute(to target: CLLocationCoordinate2D, from origin: CLLocationCoordinate2D?,
+                              via: [CLLocationCoordinate2D] = []) {
         routeTask?.cancel()
         destination = target
         route = nil
@@ -218,7 +244,7 @@ struct ContentView: View {
         isRouting = true
         routeTask = Task {
             do {
-                let newRoute = try await directions.route(from: origin, to: target)
+                let newRoute = try await directions.route(from: origin, to: target, via: via)
                 guard !Task.isCancelled else { return }
                 route = newRoute
             } catch {

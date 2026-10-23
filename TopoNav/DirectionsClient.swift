@@ -61,13 +61,15 @@ struct DirectionsClient {
 
     /// Requests a route, retrying once on failures that look transient: a timeout, a server
     /// error, or a slow "no route". Fast "no route" answers and cancellations are not retried.
-    func route(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D) async throws -> Route {
+    /// `via` waypoints, in order, make the route pass through specific roads.
+    func route(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D,
+               via waypoints: [CLLocationCoordinate2D] = []) async throws -> Route {
         let started = Date()
         do {
-            return try await requestRoute(from: origin, to: destination)
+            return try await requestRoute(from: origin, to: destination, via: waypoints)
         } catch let error as DirectionsError where isTransient(error, elapsed: Date().timeIntervalSince(started)) {
             try Task.checkCancellation()
-            return try await requestRoute(from: origin, to: destination)
+            return try await requestRoute(from: origin, to: destination, via: waypoints)
         }
     }
 
@@ -84,10 +86,11 @@ struct DirectionsClient {
         }
     }
 
-    private func requestRoute(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D) async throws -> Route {
+    private func requestRoute(from origin: CLLocationCoordinate2D, to destination: CLLocationCoordinate2D,
+                              via waypoints: [CLLocationCoordinate2D]) async throws -> Route {
         guard let token = MapboxToken.value else { throw DirectionsError.missingToken }
 
-        let coordinates = [origin, destination]
+        let coordinates = ([origin] + waypoints + [destination])
             .map { "\($0.longitude),\($0.latitude)" }
             .joined(separator: ";")
         var components = URLComponents(string: "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/\(coordinates)")!
