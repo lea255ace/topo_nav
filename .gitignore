@@ -21,3 +21,6 @@ playground.xcworkspace
 # Swift Package Manager
 .build/
 .swiftpm/
+
+# Python
+__pycache__/
