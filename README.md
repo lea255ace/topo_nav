@@ -96,6 +96,7 @@ Debug builds show a sliders button next to the map style picker. It opens a pane
 - **Zoom:** how close the camera sits to the puck.
 - **Puck lower by:** moves the puck down the screen to show more road ahead.
 - **Exaggeration:** terrain height multiplier.
+- **Haze starts / Haze ends / Horizon blend:** the distance haze that fades far terrain into the sky, and how far up the sky the horizon glow extends. Distances are relative to the map's center point.
 - **Smoothing:** how gently the camera turns to a new direction; higher is steadier but lags more.
 - **Look ahead / Look-ahead weight:** while a route is shown and you're on it, turns the camera toward where the route goes that far ahead. A weight of 0 follows your direction of travel only.
 

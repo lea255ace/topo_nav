@@ -13,6 +13,12 @@ struct CameraTuning: Codable, Equatable {
     /// Moves the puck down the screen by this many points, showing more of the road ahead.
     var puckOffset: Double = 0
     var terrainExaggeration: Double = 1.5
+    /// Distance haze: fades terrain from clear (`fogStart`) to fully hazy (`fogEnd`). Measured
+    /// from the map's center point, so negative values are nearer the camera.
+    var fogStart: Double = 1
+    var fogEnd: Double = 12
+    /// How far up the sky the horizon haze extends (0 = a sharp horizon line).
+    var horizonBlend: Double = 0.1
     /// Scales how long the camera takes to turn to a new direction: higher is steadier but lags more.
     var smoothing: Double = 1
     /// How far along the active route the camera looks ahead, in meters.
@@ -27,7 +33,8 @@ struct CameraTuning: Codable, Equatable {
     var summary: String {
         """
         pitch: \(pitch.formatted()), followZoom: \(followZoom.formatted()), puckOffset: \(puckOffset.formatted()), \
-        terrainExaggeration: \(terrainExaggeration.formatted()), smoothing: \(smoothing.formatted()), \
+        terrainExaggeration: \(terrainExaggeration.formatted()), fogStart: \(fogStart.formatted()), \
+        fogEnd: \(fogEnd.formatted()), horizonBlend: \(horizonBlend.formatted()), smoothing: \(smoothing.formatted()), \
         lookAheadDistance: \(lookAheadDistance.formatted()), lookAheadWeight: \(lookAheadWeight.formatted())
         """
     }
@@ -45,12 +52,22 @@ final class CameraSettings {
     init() {
 #if DEBUG
         if let data = UserDefaults.standard.data(forKey: Self.storageKey),
-           let saved = try? JSONDecoder().decode(CameraTuning.self, from: data) {
+           let saved = (try? JSONDecoder().decode(CameraTuning.self, from: data)) ?? Self.migrate(data) {
             tuning = saved
             return
         }
 #endif
         tuning = .defaults
+    }
+
+    /// Keeps tuning saved by an older build, filling settings it didn't have with defaults.
+    private static func migrate(_ data: Data) -> CameraTuning? {
+        guard let saved = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              var merged = (try? JSONSerialization.jsonObject(with: JSONEncoder().encode(CameraTuning.defaults))) as? [String: Any]
+        else { return nil }
+        merged.merge(saved) { _, savedValue in savedValue }
+        guard let json = try? JSONSerialization.data(withJSONObject: merged) else { return nil }
+        return try? JSONDecoder().decode(CameraTuning.self, from: json)
     }
 
     func reset() {

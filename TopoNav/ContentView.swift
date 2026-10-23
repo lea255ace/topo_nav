@@ -58,9 +58,9 @@ struct ContentView: View {
                 .maxzoom(14)
             Terrain(sourceId: "mapbox-dem")
                 .exaggeration(settings.tuning.terrainExaggeration)
-            SkyLayer(id: "sky")
-                .skyType(.atmosphere)
-                .skyAtmosphereSunIntensity(15)
+            // Atmosphere (fog) is computed from the camera every frame, so the haze stays
+            // attached to the terrain and the horizon at any pitch, unlike a separate sky layer.
+            SceneAtmosphere(tuning: settings.tuning, style: baseStyle)
 
             if let route {
                 RouteLine(route: route)
@@ -317,6 +317,24 @@ enum BaseStyle: String, CaseIterable, Identifiable {
         case .satelliteStreets: .satelliteStreets
         case .outdoors: .outdoors
         }
+    }
+}
+
+/// Sky and distance haze for the 3D view.
+struct SceneAtmosphere: MapStyleContent {
+    let tuning: CameraTuning
+    let style: BaseStyle
+
+    var body: some MapStyleContent {
+        Atmosphere()
+            .range(start: tuning.fogStart, end: tuning.fogEnd)
+            .horizonBlend(tuning.horizonBlend)
+            // Haze just above and below the horizon, the sky higher up, and the sky overhead.
+            .color(style == .satelliteStreets ? UIColor(red: 0.86, green: 0.91, blue: 0.95, alpha: 1)
+                                              : UIColor(red: 0.90, green: 0.93, blue: 0.95, alpha: 1))
+            .highColor(UIColor(red: 0.45, green: 0.66, blue: 0.92, alpha: 1))
+            .spaceColor(UIColor(red: 0.30, green: 0.55, blue: 0.88, alpha: 1))
+            .starIntensity(0)
     }
 }
 

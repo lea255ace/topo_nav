@@ -19,6 +19,15 @@ struct CameraTuningPanel: View {
                 TuningSlider("Exaggeration", value: $settings.tuning.terrainExaggeration, in: 1...3, step: 0.1, unit: "×")
             }
             Section {
+                TuningSlider("Haze starts", value: $settings.tuning.fogStart, in: -5...10, step: 0.25)
+                TuningSlider("Haze ends", value: $settings.tuning.fogEnd, in: 1...20, step: 0.25)
+                TuningSlider("Horizon blend", value: $settings.tuning.horizonBlend, in: 0...0.5, step: 0.01)
+            } header: {
+                Text("Atmosphere")
+            } footer: {
+                Text("Distances are relative to the map's center point; negative values are nearer the camera.")
+            }
+            Section {
                 TuningSlider("Smoothing", value: $settings.tuning.smoothing, in: 0.25...4, step: 0.05, unit: "×")
                 TuningSlider("Look ahead", value: $settings.tuning.lookAheadDistance, in: 50...1000, step: 25, unit: " m")
                 TuningSlider("Look-ahead weight", value: $settings.tuning.lookAheadWeight, in: 0...1, step: 0.05)
