@@ -6,17 +6,15 @@ import MapboxMaps
 /// Long-press the map to drop a destination and draw a driving route to it.
 struct ContentView: View {
     static let donnerPass = CLLocationCoordinate2D(latitude: 39.3157, longitude: -120.3291)
-    static let pitch: CGFloat = 60
-    static let followZoom: CGFloat = 14.5
-    static let terrainExaggeration: Double = 1.5
 
-    /// Trails behind the puck and rotates to match the direction of travel.
-    static let followViewport: Viewport = .followPuck(zoom: followZoom, bearing: .course, pitch: pitch)
-
-    @State private var viewport: Viewport = .camera(center: donnerPass, zoom: 12.5, bearing: 0, pitch: pitch)
+    @State private var settings: CameraSettings
+    @State private var viewport: Viewport
     @State private var baseStyle: BaseStyle = .satelliteStreets
     @State private var location = LocationAuthorization()
     @State private var travelDirection = TravelDirection()
+#if DEBUG
+    @State private var showsTuning = false
+#endif
 
     @State private var destination: CLLocationCoordinate2D?
     @State private var route: Route?
@@ -26,8 +24,22 @@ struct ContentView: View {
 
     private let directions = DirectionsClient()
 
+    init() {
+        let settings = CameraSettings()
+        _settings = State(initialValue: settings)
+        _viewport = State(initialValue: .camera(center: Self.donnerPass, zoom: 12.5, bearing: 0,
+                                                pitch: settings.tuning.pitch))
+    }
+
     /// The map sets `viewport` to idle as soon as the user drags or rotates it.
     private var isFollowing: Bool { viewport.followPuck != nil }
+
+    /// Trails behind the puck and turns with the camera bearing (see `TravelDirection`).
+    private var followViewport: Viewport {
+        let tuning = settings.tuning
+        return Viewport.followPuck(zoom: tuning.followZoom, bearing: .course, pitch: tuning.pitch)
+            .padding(.top, tuning.puckOffset)
+    }
 
     var body: some View {
         MapReader { proxy in
@@ -38,14 +50,14 @@ struct ContentView: View {
     private func map(proxy: MapProxy) -> some View {
         Map(viewport: $viewport) {
             if location.isAuthorized {
-                Puck2D(bearing: .course)
+                Puck2D(bearing: .heading)
             }
 
             RasterDemSource(id: "mapbox-dem")
                 .url("mapbox://mapbox.mapbox-terrain-dem-v1")
                 .maxzoom(14)
             Terrain(sourceId: "mapbox-dem")
-                .exaggeration(Self.terrainExaggeration)
+                .exaggeration(settings.tuning.terrainExaggeration)
             SkyLayer(id: "sky")
                 .skyType(.atmosphere)
                 .skyAtmosphereSunIntensity(15)
@@ -77,15 +89,28 @@ struct ContentView: View {
         .ignoresSafeArea()
         .overlay(alignment: .top) {
             VStack(spacing: 8) {
-                Picker("Map style", selection: $baseStyle) {
-                    ForEach(BaseStyle.allCases) { style in
-                        Text(style.title).tag(style)
+                HStack(spacing: 8) {
+                    Picker("Map style", selection: $baseStyle) {
+                        ForEach(BaseStyle.allCases) { style in
+                            Text(style.title).tag(style)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 280)
+                    .padding(6)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+#if DEBUG
+                    Button {
+                        showsTuning.toggle()
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 44, height: 44)
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .accessibilityLabel("Camera tuning")
+#endif
                 }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 280)
-                .padding(6)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
 
                 if isRouting {
                     Label {
@@ -124,7 +149,7 @@ struct ContentView: View {
         }
         .onAppear {
             if location.isAuthorized {
-                viewport = Self.followViewport
+                viewport = followViewport
             } else {
                 location.requestIfNeeded()
             }
@@ -133,11 +158,28 @@ struct ContentView: View {
             guard isAuthorized else { return }
             startFollowing()
         }
+        .onChange(of: settings.tuning, initial: true) { _, tuning in
+            travelDirection.tuning = tuning
+            // Apply camera changes straight away while following.
+            if isFollowing {
+                withViewportAnimation(.default(maxDuration: 0.4)) {
+                    viewport = followViewport
+                }
+            }
+        }
+        .onChange(of: route, initial: true) { _, route in
+            travelDirection.route = route?.coordinates
+        }
+#if DEBUG
+        .sheet(isPresented: $showsTuning) {
+            CameraTuningPanel(settings: settings)
+        }
+#endif
     }
 
     private func startFollowing() {
         withViewportAnimation(.default(maxDuration: 2)) {
-            viewport = Self.followViewport
+            viewport = followViewport
         }
     }
 

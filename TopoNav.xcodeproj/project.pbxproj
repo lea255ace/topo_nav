@@ -17,6 +17,8 @@
 		A1000000000000000000000B /* LocationDeniedBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* LocationDeniedBanner.swift */; };
 		A1000000000000000000000C /* DirectionsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* DirectionsClient.swift */; };
 		A1000000000000000000000D /* TravelDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* TravelDirection.swift */; };
+		A1000000000000000000000E /* CameraSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E /* CameraSettings.swift */; };
+		A1000000000000000000000F /* CameraTuningPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* CameraTuningPanel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		A2000000000000000000000B /* LocationDeniedBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDeniedBanner.swift; sourceTree = "<group>"; };
 		A2000000000000000000000C /* DirectionsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectionsClient.swift; sourceTree = "<group>"; };
 		A2000000000000000000000D /* TravelDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDirection.swift; sourceTree = "<group>"; };
+		A2000000000000000000000E /* CameraSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSettings.swift; sourceTree = "<group>"; };
+		A2000000000000000000000F /* CameraTuningPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraTuningPanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +73,8 @@
 				A2000000000000000000000B /* LocationDeniedBanner.swift */,
 				A2000000000000000000000C /* DirectionsClient.swift */,
 				A2000000000000000000000D /* TravelDirection.swift */,
+				A2000000000000000000000F /* CameraTuningPanel.swift */,
+				A2000000000000000000000E /* CameraSettings.swift */,
 				A20000000000000000000005 /* Assets.xcassets */,
 				A20000000000000000000006 /* Info.plist */,
 			);
@@ -183,6 +189,8 @@
 				A1000000000000000000000B /* LocationDeniedBanner.swift in Sources */,
 				A1000000000000000000000C /* DirectionsClient.swift in Sources */,
 				A1000000000000000000000D /* TravelDirection.swift in Sources */,
+				A1000000000000000000000F /* CameraTuningPanel.swift in Sources */,
+				A1000000000000000000000E /* CameraSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
