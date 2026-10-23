@@ -18,6 +18,9 @@ struct ContentView: View {
 
     @State private var destination: CLLocationCoordinate2D?
     @State private var route: Route?
+    @State private var routeSegments: FeatureCollection?
+    /// Where the route's width is measured from: the puck, updated in coarse steps.
+    @State private var routeAnchor: CLLocationCoordinate2D?
     @State private var routeTask: Task<Void, Never>?
     @State private var isRouting = false
     @State private var routeError: String?
@@ -63,7 +66,8 @@ struct ContentView: View {
             SceneAtmosphere(tuning: settings.tuning, style: baseStyle)
 
             if let route {
-                RouteLine(route: route)
+                RouteLine(segments: routeSegments ?? RouteLine.segments(for: route),
+                          anchor: routeAnchor, tuning: settings.tuning)
             }
             if let destination {
                 MapViewAnnotation(coordinate: destination) {
@@ -169,6 +173,19 @@ struct ContentView: View {
         }
         .onChange(of: route, initial: true) { _, route in
             travelDirection.route = route?.coordinates
+            routeSegments = route.map(RouteLine.segments)
+            routeAnchor = nil
+        }
+        .onAppear {
+            travelDirection.onPositionWithRoute = { position in
+                // Only re-style the route when the puck has moved meaningfully.
+                if let anchor = routeAnchor,
+                   CLLocation(latitude: anchor.latitude, longitude: anchor.longitude)
+                       .distance(from: CLLocation(latitude: position.latitude, longitude: position.longitude)) < 25 {
+                    return
+                }
+                routeAnchor = position
+            }
         }
 #if DEBUG
         .sheet(isPresented: $showsTuning) {
@@ -224,25 +241,69 @@ struct RouteLine: MapStyleContent {
     /// Declarative layers can only be positioned through a slot, so anchor one below the labels.
     static let slot: Slot = "below-labels"
 
-    let route: Route
+    static let lineWidth = 6.0
+    static let casingWidth = 10.0
+    /// Length of each route segment; short enough that the width change looks continuous.
+    static let segmentLength: CLLocationDistance = 20
+
+    /// The route split into short segments, so each can have its own width.
+    let segments: FeatureCollection
+    /// Where width is measured from (the puck), or nil before a position is known.
+    let anchor: CLLocationCoordinate2D?
+    let tuning: CameraTuning
 
     var body: some MapStyleContent {
         SlotLayer(id: Self.slot.rawValue)
             .position(.below(Self.labelLayerId))
         GeoJSONSource(id: Self.sourceId)
-            .data(.geometry(.lineString(LineString(route.coordinates))))
+            .data(.featureCollection(segments))
         LineLayer(id: "route-casing", source: Self.sourceId)
             .lineColor(UIColor(white: 0.05, alpha: 0.85))
-            .lineWidth(10)
+            .lineWidth(width(Self.casingWidth))
             .lineJoin(.round)
             .lineCap(.round)
             .slot(Self.slot)
         LineLayer(id: "route-line", source: Self.sourceId)
             .lineColor(UIColor(red: 1.0, green: 0.18, blue: 0.62, alpha: 1))
-            .lineWidth(6)
+            .lineWidth(width(Self.lineWidth))
             .lineJoin(.round)
             .lineCap(.round)
             .slot(Self.slot)
+    }
+
+    /// Widens each segment with its straight-line distance from the puck, which offsets
+    /// perspective making distant stretches look thin. Measuring from the puck rather than
+    /// along the route keeps switchbacks and U-turns that come back near you at normal width.
+    private func width(_ base: Double) -> Exp {
+        guard let anchor, tuning.routeFarWidth > 1 else { return Exp(.literal) { base } }
+        return Exp(.interpolate) {
+            Exp(.linear)
+            Exp(.distance) { GeoJSONObject.geometry(.point(Point(anchor))) }
+            0
+            base
+            max(tuning.routeFarDistance, 1)
+            base * tuning.routeFarWidth
+        }
+    }
+
+    static func segments(for route: Route) -> FeatureCollection {
+        var features: [Feature] = []
+        var current = [route.coordinates[0]]
+        var length: CLLocationDistance = 0
+        for (a, b) in zip(route.coordinates, route.coordinates.dropFirst()) {
+            length += CLLocation(latitude: a.latitude, longitude: a.longitude)
+                .distance(from: CLLocation(latitude: b.latitude, longitude: b.longitude))
+            current.append(b)
+            if length >= segmentLength {
+                features.append(Feature(geometry: .lineString(LineString(current))))
+                current = [b]
+                length = 0
+            }
+        }
+        if current.count >= 2 {
+            features.append(Feature(geometry: .lineString(LineString(current))))
+        }
+        return FeatureCollection(features: features)
     }
 }
 
@@ -327,11 +388,13 @@ struct SceneAtmosphere: MapStyleContent {
 
     var body: some MapStyleContent {
         Atmosphere()
-            .range(start: tuning.fogStart, end: tuning.fogEnd)
+            .range(start: tuning.fogStart, end: max(tuning.fogEnd, tuning.fogStart + 0.25))
             .horizonBlend(tuning.horizonBlend)
-            // Haze just above and below the horizon, the sky higher up, and the sky overhead.
-            .color(style == .satelliteStreets ? UIColor(red: 0.86, green: 0.91, blue: 0.95, alpha: 1)
-                                              : UIColor(red: 0.90, green: 0.93, blue: 0.95, alpha: 1))
+            // Haze just above and below the horizon (its alpha is the haze strength), the sky
+            // higher up, and the sky overhead.
+            .color(style == .satelliteStreets
+                   ? UIColor(red: 0.86, green: 0.91, blue: 0.95, alpha: tuning.hazeStrength)
+                   : UIColor(red: 0.90, green: 0.93, blue: 0.95, alpha: tuning.hazeStrength))
             .highColor(UIColor(red: 0.45, green: 0.66, blue: 0.92, alpha: 1))
             .spaceColor(UIColor(red: 0.30, green: 0.55, blue: 0.88, alpha: 1))
             .starIntensity(0)

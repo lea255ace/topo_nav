@@ -19,13 +19,22 @@ struct CameraTuningPanel: View {
                 TuningSlider("Exaggeration", value: $settings.tuning.terrainExaggeration, in: 1...3, step: 0.1, unit: "×")
             }
             Section {
-                TuningSlider("Haze starts", value: $settings.tuning.fogStart, in: -5...10, step: 0.25)
-                TuningSlider("Haze ends", value: $settings.tuning.fogEnd, in: 1...20, step: 0.25)
+                TuningSlider("Haze strength", value: $settings.tuning.hazeStrength, in: 0...1, step: 0.05)
+                TuningSlider("Haze starts", value: $settings.tuning.fogStart, in: -20...20, step: 0.25)
+                TuningSlider("Haze ends", value: $settings.tuning.fogEnd, in: -20...20, step: 0.25)
                 TuningSlider("Horizon blend", value: $settings.tuning.horizonBlend, in: 0...0.5, step: 0.01)
             } header: {
                 Text("Atmosphere")
             } footer: {
                 Text("Distances are relative to the map's center point; negative values are nearer the camera.")
+            }
+            Section {
+                TuningSlider("Far width", value: $settings.tuning.routeFarWidth, in: 1...5, step: 0.1, unit: "×")
+                TuningSlider("Full width at", value: $settings.tuning.routeFarDistance, in: 500...10000, step: 250, unit: " m")
+            } header: {
+                Text("Route")
+            } footer: {
+                Text("Widens the route line with distance from you, so it stays visible far off.")
             }
             Section {
                 TuningSlider("Smoothing", value: $settings.tuning.smoothing, in: 0.25...4, step: 0.05, unit: "×")

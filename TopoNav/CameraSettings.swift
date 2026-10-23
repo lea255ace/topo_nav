@@ -19,6 +19,13 @@ struct CameraTuning: Codable, Equatable {
     var fogEnd: Double = 12
     /// How far up the sky the horizon haze extends (0 = a sharp horizon line).
     var horizonBlend: Double = 0.1
+    /// Haze opacity: 1 is full strength, 0 turns the haze off. (Mapbox has no separate fog
+    /// intensity; this is the fog color's alpha. Below 1, Mapbox loads and draws more tiles.)
+    var hazeStrength: Double = 1
+    /// How much wider the route line gets far from you, to offset perspective thinning it.
+    var routeFarWidth: Double = 2.5
+    /// Straight-line distance from you, in meters, at which the route reaches `routeFarWidth`.
+    var routeFarDistance: Double = 4000
     /// Scales how long the camera takes to turn to a new direction: higher is steadier but lags more.
     var smoothing: Double = 1
     /// How far along the active route the camera looks ahead, in meters.
@@ -34,7 +41,8 @@ struct CameraTuning: Codable, Equatable {
         """
         pitch: \(pitch.formatted()), followZoom: \(followZoom.formatted()), puckOffset: \(puckOffset.formatted()), \
         terrainExaggeration: \(terrainExaggeration.formatted()), fogStart: \(fogStart.formatted()), \
-        fogEnd: \(fogEnd.formatted()), horizonBlend: \(horizonBlend.formatted()), smoothing: \(smoothing.formatted()), \
+        fogEnd: \(fogEnd.formatted()), horizonBlend: \(horizonBlend.formatted()), hazeStrength: \(hazeStrength.formatted()), \
+        routeFarWidth: \(routeFarWidth.formatted()), routeFarDistance: \(routeFarDistance.formatted()), smoothing: \(smoothing.formatted()), \
         lookAheadDistance: \(lookAheadDistance.formatted()), lookAheadWeight: \(lookAheadWeight.formatted())
         """
     }
