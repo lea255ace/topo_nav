@@ -4,7 +4,7 @@ An iPhone app for live, route-based navigation on a 3D terrain map. Instead of a
 
 Built with Swift, SwiftUI and the [Mapbox Maps SDK for iOS](https://github.com/mapbox/mapbox-maps-ios) (v11). Routes come from the Mapbox Directions API. You supply your own Mapbox access token.
 
-> **Status:** version 0.1.0: a 3D terrain map with Satellite and Outdoors styles, location follow mode with a course-up camera, long-press routing and a Recenter button. Search, rerouting, spoken directions and CarPlay are not included yet.
+> **Status:** version 0.2.0: a 3D terrain map with Satellite and Outdoors styles, location follow mode with a course-up camera, long-press routing and a Recenter button, with a terrain-hugging atmosphere and a route line that stays readable into the distance. Search, rerouting, spoken directions and CarPlay are not included yet.
 
 ## Requirements
 
@@ -156,10 +156,10 @@ agvtool next-version -all
 ```
 
 ```bash
-agvtool new-marketing-version 0.2.0
+sed -i '' 's/MARKETING_VERSION = [0-9.]*;/MARKETING_VERSION = 0.3.0;/' TopoNav.xcodeproj/project.pbxproj
 ```
 
-(`next-version` may print a harmless note about `Info.plist`; the build number lives in the project's build settings.)
+(Both version numbers are build settings in the project file. `next-version` may print a harmless note about `Info.plist`; `agvtool new-marketing-version` doesn't work here because it only edits `Info.plist`.)
 
 ## License
 
