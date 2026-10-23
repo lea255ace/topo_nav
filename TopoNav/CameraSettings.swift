@@ -7,18 +7,18 @@ import Observation
 /// camera tuning panel, and the tuned values are saved between launches.
 struct CameraTuning: Codable, Equatable {
     /// Camera tilt in degrees: 0 looks straight down, 85 (Mapbox's maximum) is near the horizon.
-    var pitch: Double = 60
+    var pitch: Double = 80
     /// Follow-mode zoom level; higher sits closer to the puck.
-    var followZoom: Double = 14.5
+    var followZoom: Double = 17
     /// Moves the puck down the screen by this many points, showing more of the road ahead.
-    var puckOffset: Double = 0
-    var terrainExaggeration: Double = 1.5
+    var puckOffset: Double = 150
+    var terrainExaggeration: Double = 2
     /// Distance haze: fades terrain from clear (`fogStart`) to fully hazy (`fogEnd`). Measured
     /// from the map's center point, so negative values are nearer the camera.
-    var fogStart: Double = 1
-    var fogEnd: Double = 12
+    var fogStart: Double = 10
+    var fogEnd: Double = 17
     /// How far up the sky the horizon haze extends (0 = a sharp horizon line).
-    var horizonBlend: Double = 0.1
+    var horizonBlend: Double = 0
     /// Haze opacity: 1 is full strength, 0 turns the haze off. (Mapbox has no separate fog
     /// intensity; this is the fog color's alpha. Below 1, Mapbox loads and draws more tiles.)
     var hazeStrength: Double = 1
@@ -27,12 +27,12 @@ struct CameraTuning: Codable, Equatable {
     /// Straight-line distance from you, in meters, at which the route reaches `routeFarWidth`.
     var routeFarDistance: Double = 4000
     /// Scales how long the camera takes to turn to a new direction: higher is steadier but lags more.
-    var smoothing: Double = 1
+    var smoothing: Double = 1.45
     /// How far along the active route the camera looks ahead, in meters.
-    var lookAheadDistance: Double = 250
+    var lookAheadDistance: Double = 500
     /// How far the camera turns toward the route ahead: 0 follows the current direction of
     /// travel only, 1 points at the look-ahead point on the route.
-    var lookAheadWeight: Double = 0
+    var lookAheadWeight: Double = 0.6
 
     static let defaults = CameraTuning()
 
